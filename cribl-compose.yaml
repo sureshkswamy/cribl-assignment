@@ -1,0 +1,57 @@
+version: '3'
+services:
+ target_1:
+    container_name: target_1
+    build:
+      dockerfile: Dockerfile
+      args:
+        MODE: ${MODE_TARGET}  
+    ports:
+      - "${TARGET1_PORT}:9997"
+    volumes:
+      - target_1:/usr/src/app
+ target_2:
+    container_name: target_2
+    build:
+      dockerfile: Dockerfile
+      args:
+        MODE: ${MODE_TARGET}  
+    ports:
+      - "${TARGET2_PORT}:9997"
+    volumes:
+      - target_2:/usr/src/app
+    depends_on:
+      - target_1
+ splitter:
+    container_name: splitter
+    build:
+      dockerfile: Dockerfile
+      args:
+        MODE: ${MODE_SPLITTER}  
+    ports:
+      - "${SPLITTER_PORT}:9997"
+    depends_on:
+      - target_2   
+ agent:
+    container_name: agent
+    build:
+      dockerfile: Dockerfile
+      args:
+        MODE: ${MODE_AGENT}  
+    ports:
+      - "${AGENT_PORT}:80"
+    depends_on:
+      - splitter
+volumes:
+ target_1:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${T1_VOLUME}
+ target_2:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${T2_VOLUME}
